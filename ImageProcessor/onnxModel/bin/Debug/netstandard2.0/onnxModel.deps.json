@@ -10,7 +10,7 @@
       "onnxModel/1.0.0": {
         "dependencies": {
           "Microsoft.ML": "1.5.2",
-          "Microsoft.ML.OnnxRuntime": "1.5.1",
+          "Microsoft.ML.OnnxRuntime": "1.4.0",
           "NETStandard.Library": "2.0.3",
           "SixLabors.ImageSharp": "1.0.1"
         },
@@ -105,12 +105,12 @@
           }
         }
       },
-      "Microsoft.ML.OnnxRuntime/1.5.1": {
+      "Microsoft.ML.OnnxRuntime/1.4.0": {
         "dependencies": {
-          "Microsoft.ML.OnnxRuntime.Managed": "1.5.1"
+          "Microsoft.ML.OnnxRuntime.Managed": "1.4.0"
         }
       },
-      "Microsoft.ML.OnnxRuntime.Managed/1.5.1": {
+      "Microsoft.ML.OnnxRuntime.Managed/1.4.0": {
         "dependencies": {
           "NETStandard.Library": "2.0.3",
           "System.Memory": "4.5.3"
@@ -734,19 +734,19 @@
       "path": "microsoft.ml.dataview/1.5.2",
       "hashPath": "microsoft.ml.dataview.1.5.2.nupkg.sha512"
     },
-    "Microsoft.ML.OnnxRuntime/1.5.1": {
+    "Microsoft.ML.OnnxRuntime/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kiJF7iJfRo2WWiqUqVI4by8zAO7ImpxbmLG7HLOD7wKA24UIQ/eU0lRJvfantbEb1SGCFpBWXrL1puOXM7d0Sw==",
-      "path": "microsoft.ml.onnxruntime/1.5.1",
-      "hashPath": "microsoft.ml.onnxruntime.1.5.1.nupkg.sha512"
+      "sha512": "sha512-/P6AKlKdIDoqSqFSX+aaiByvYIkrr2WoY49vISQecLPdjX4UDeq+YhAYpXiKrzmrOZP6m5EBKqBvaGa2kFQlMQ==",
+      "path": "microsoft.ml.onnxruntime/1.4.0",
+      "hashPath": "microsoft.ml.onnxruntime.1.4.0.nupkg.sha512"
     },
-    "Microsoft.ML.OnnxRuntime.Managed/1.5.1": {
+    "Microsoft.ML.OnnxRuntime.Managed/1.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-183RRtFB5NNUJhnURmcU5xNY++N2cYoRqwf+UssIw5N+7gdMBWaIZuiD7jlqPH85BFnHOQ3XPAIBhZ0AyPAtTw==",
-      "path": "microsoft.ml.onnxruntime.managed/1.5.1",
-      "hashPath": "microsoft.ml.onnxruntime.managed.1.5.1.nupkg.sha512"
+      "sha512": "sha512-0Mdi52c3s5T75oq4xnYDz8BcRKZFx9JZF/eLAKJNbybKbHvHvXs7kXD0fR6zbvdkJyO9NcsVQObLUx5SQqk80w==",
+      "path": "microsoft.ml.onnxruntime.managed/1.4.0",
+      "hashPath": "microsoft.ml.onnxruntime.managed.1.4.0.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",

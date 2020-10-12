@@ -39,6 +39,12 @@
       },
       "frameworks": {
         "netcoreapp3.0": {
+          "dependencies": {
+            "Microsoft.ML": {
+              "target": "Package",
+              "version": "[1.5.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -96,7 +102,7 @@
             },
             "Microsoft.ML.OnnxRuntime": {
               "target": "Package",
-              "version": "[1.5.1, )"
+              "version": "[1.4.0, )"
             },
             "NETStandard.Library": {
               "suppressParent": "All",

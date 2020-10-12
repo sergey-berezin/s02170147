@@ -126,10 +126,10 @@
           "lib/netstandard2.0/Microsoft.ML.DataView.dll": {}
         }
       },
-      "Microsoft.ML.OnnxRuntime/1.5.1": {
+      "Microsoft.ML.OnnxRuntime/1.4.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.ML.OnnxRuntime.Managed": "1.5.1"
+          "Microsoft.ML.OnnxRuntime.Managed": "1.4.0"
         },
         "build": {
           "build/netstandard1.1/Microsoft.ML.OnnxRuntime.props": {},
@@ -178,7 +178,7 @@
           }
         }
       },
-      "Microsoft.ML.OnnxRuntime.Managed/1.5.1": {
+      "Microsoft.ML.OnnxRuntime.Managed/1.4.0": {
         "type": "package",
         "dependencies": {
           "NETStandard.Library": "1.6.1",
@@ -1041,10 +1041,10 @@
         "mlnetlogo.png"
       ]
     },
-    "Microsoft.ML.OnnxRuntime/1.5.1": {
-      "sha512": "kiJF7iJfRo2WWiqUqVI4by8zAO7ImpxbmLG7HLOD7wKA24UIQ/eU0lRJvfantbEb1SGCFpBWXrL1puOXM7d0Sw==",
+    "Microsoft.ML.OnnxRuntime/1.4.0": {
+      "sha512": "/P6AKlKdIDoqSqFSX+aaiByvYIkrr2WoY49vISQecLPdjX4UDeq+YhAYpXiKrzmrOZP6m5EBKqBvaGa2kFQlMQ==",
       "type": "package",
-      "path": "microsoft.ml.onnxruntime/1.5.1",
+      "path": "microsoft.ml.onnxruntime/1.4.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1059,10 +1059,9 @@
         "build/native/include/onnxruntime_c_api.h",
         "build/native/include/onnxruntime_cxx_api.h",
         "build/native/include/onnxruntime_cxx_inline.h",
-        "build/native/include/onnxruntime_session_options_config_keys.h",
         "build/netstandard1.1/Microsoft.ML.OnnxRuntime.props",
         "build/netstandard1.1/Microsoft.ML.OnnxRuntime.targets",
-        "microsoft.ml.onnxruntime.1.5.1.nupkg.sha512",
+        "microsoft.ml.onnxruntime.1.4.0.nupkg.sha512",
         "microsoft.ml.onnxruntime.nuspec",
         "runtimes/linux-x64/native/libonnxruntime.so",
         "runtimes/osx-x64/native/libonnxruntime.dylib",
@@ -1076,10 +1075,10 @@
         "runtimes/win-x86/native/onnxruntime.pdb"
       ]
     },
-    "Microsoft.ML.OnnxRuntime.Managed/1.5.1": {
-      "sha512": "183RRtFB5NNUJhnURmcU5xNY++N2cYoRqwf+UssIw5N+7gdMBWaIZuiD7jlqPH85BFnHOQ3XPAIBhZ0AyPAtTw==",
+    "Microsoft.ML.OnnxRuntime.Managed/1.4.0": {
+      "sha512": "0Mdi52c3s5T75oq4xnYDz8BcRKZFx9JZF/eLAKJNbybKbHvHvXs7kXD0fR6zbvdkJyO9NcsVQObLUx5SQqk80w==",
       "type": "package",
-      "path": "microsoft.ml.onnxruntime.managed/1.5.1",
+      "path": "microsoft.ml.onnxruntime.managed/1.4.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1090,7 +1089,7 @@
         "build/netstandard1.1/Microsoft.ML.OnnxRuntime.Managed.targets",
         "lib/netstandard1.1/Microsoft.ML.OnnxRuntime.dll",
         "lib/netstandard1.1/Microsoft.ML.OnnxRuntime.pdb",
-        "microsoft.ml.onnxruntime.managed.1.5.1.nupkg.sha512",
+        "microsoft.ml.onnxruntime.managed.1.4.0.nupkg.sha512",
         "microsoft.ml.onnxruntime.managed.nuspec"
       ]
     },
@@ -3781,7 +3780,7 @@
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
       "Microsoft.ML >= 1.5.2",
-      "Microsoft.ML.OnnxRuntime >= 1.5.1",
+      "Microsoft.ML.OnnxRuntime >= 1.4.0",
       "NETStandard.Library >= 2.0.3",
       "SixLabors.ImageSharp >= 1.0.1"
     ]
@@ -3827,7 +3826,7 @@
           },
           "Microsoft.ML.OnnxRuntime": {
             "target": "Package",
-            "version": "[1.5.1, )"
+            "version": "[1.4.0, )"
           },
           "NETStandard.Library": {
             "suppressParent": "All",

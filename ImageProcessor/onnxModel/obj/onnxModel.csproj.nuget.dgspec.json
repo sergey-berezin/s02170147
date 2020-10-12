@@ -42,7 +42,7 @@
             },
             "Microsoft.ML.OnnxRuntime": {
               "target": "Package",
-              "version": "[1.5.1, )"
+              "version": "[1.4.0, )"
             },
             "NETStandard.Library": {
               "suppressParent": "All",
