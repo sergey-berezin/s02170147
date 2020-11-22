@@ -1,8 +1,0 @@
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/bin/Debug/netstandard2.0/onnxModel.deps.json
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/bin/Debug/netstandard2.0/onnxModel.dll
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/bin/Debug/netstandard2.0/onnxModel.pdb
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/obj/Debug/netstandard2.0/onnxModel.csprojAssemblyReference.cache
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/obj/Debug/netstandard2.0/onnxModel.AssemblyInfoInputs.cache
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/obj/Debug/netstandard2.0/onnxModel.AssemblyInfo.cs
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/obj/Debug/netstandard2.0/onnxModel.dll
-/Users/vladimirlisovoi/Desktop/prak1/ImageProcessor/onnxModel/obj/Debug/netstandard2.0/onnxModel.pdb
