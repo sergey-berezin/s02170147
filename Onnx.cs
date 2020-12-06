@@ -13,13 +13,18 @@ using System.Collections.Generic;
 namespace onnxModel
 {
 
-    public class PredictionPrint
+    public class PredictionValues
     {
-        public string Prediction;
-        public PredictionPrint(string prediction)
+        public string Path;
+        public string Label;
+        public double Confidence;
+        public PredictionValues(string path, string label, double confidence)
         {
-            this.Prediction = prediction;
+            this.Path = path;
+            this.Label = label;
+            this.Confidence = confidence;
         }
+        
     };
     public class OnnxModel
     {
@@ -28,19 +33,19 @@ namespace onnxModel
         InferenceSession session;
         private static readonly ManualResetEvent StopSignal = new ManualResetEvent(false);
 
-        public delegate void PredictionHandler(PredictionPrint ResultPred);
+        public delegate void PredictionHandler(PredictionValues ResultPred);
         public event PredictionHandler EventResult;
         public delegate void OutputHandler(string outMessage);
         public event OutputHandler OutputEvent;
 
 
-        public OnnxModel(string Path = "Users/vladimirlisovoi/desktop/prak1/")
+        public OnnxModel(string Path = "C:/Users/Владимир/OneDrive/Desktop/img")
         {
             this.path = Path;
-            this.session = new InferenceSession("/Users/vladimirlisovoi/desktop/prak1/ImageProcessor/onnxModel/mnist-8.onnx");
+            this.session = new InferenceSession("C:/Users/Владимир/prak1/s02170147/ImageProcessor/mnist-8.onnx");        
         }
 
-        public PredictionPrint FileRead(string ImagePath)
+        public PredictionValues FileRead(string ImagePath)
         {
             Image<Rgb24> image = Image.Load<Rgb24>(ImagePath);
 
@@ -73,14 +78,18 @@ namespace onnxModel
                     new Tuple<string, float>(LabelMap.ClassLabels[i], x))
                     .OrderByDescending(x => x.Item2)
                     .Take(10);
-            var prediction = "\n";
-            foreach (var (label, confidence) in preds.ToList())
-            {
-                prediction += $"Label: {label}, confidence: {confidence}\n";
-            }
-            return new PredictionPrint(prediction);
+            //var prediction = "\n";
+            var confidence = softmax.Max();
+            var index = softmax.ToList().IndexOf(confidence);
+            //foreach (var (label, confidence) in preds.ToList())
+            //{
+            //    prediction += $"Label: {label}, confidence: {confidence}\n";
+            //}
+            return new PredictionValues(ImagePath, LabelMap.ClassLabels[index], confidence);
         
         }
+
+        public void Stop() => StopSignal.Set();
 
         public void Work()
         {
@@ -93,11 +102,11 @@ namespace onnxModel
                 OutputEvent?.Invoke("No Files");
                 return;
             }
-            Console.CancelKeyPress += (sender, eArgs) =>
-            {
-                StopSignal.Set();
-                eArgs.Cancel = true;
-            };
+            //Console.CancelKeyPress += (sender, eArgs) =>
+            //{
+            //    StopSignal.Set();
+             //   eArgs.Cancel = true;
+            //};
             var procNumb = Environment.ProcessorCount;
             var threads = new Thread[procNumb];
             for (var i = 0; i < procNumb; ++i)
