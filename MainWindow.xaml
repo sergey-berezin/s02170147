@@ -19,12 +19,12 @@
     </Window.CommandBindings>
 
     <Grid>
-        
-        <Button Content="Start" Command="{x:Static local:MainWindow.Start}" HorizontalAlignment="Left" Margin="12,12,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Content="Stop" Command="{x:Static local:MainWindow.Stop}" HorizontalAlignment="Left" Margin="102,12,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Content="Open" Command="ApplicationCommands.Open" HorizontalAlignment="Left" Margin="192,12,0,0" VerticalAlignment="Top" Width="75"/>
-        <ListBox x:Name="list_box_predicted_labels" HorizontalAlignment="Left" Margin="10,60,0,10" Width="260" SelectionChanged="list_box_predicted_labels_SelectionChanged"/>
-        <ListBox x:Name="list_box_selected_images" HorizontalAlignment="Left" Margin="300,60,0,10" Width="300">
+        <Button Content="Open" Command="ApplicationCommands.Open" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="88"/>
+        <Button Content="Start" Command="{x:Static local:MainWindow.Start}" HorizontalAlignment="Left" Margin="104,10,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Content="Stop" Command="{x:Static local:MainWindow.Stop}" HorizontalAlignment="Left" Margin="184,10,0,0" VerticalAlignment="Top" Width="75"/>
+
+        <ListBox x:Name="list_box_predicted_labels" HorizontalAlignment="Left" Margin="10,56,0,10" Width="250" SelectionChanged="list_box_predicted_labels_SelectionChanged"/>
+        <ListBox x:Name="list_box_selected_images" HorizontalAlignment="Left" Margin="264,10,0,10" Width="344">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Columns="1" />
@@ -39,6 +39,9 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <ListBox Name="list_box_db_stats" Margin="616,40,10,10"/>
+        <Button Content="Show Stats" HorizontalAlignment="Left" Margin="616,10,0,0" VerticalAlignment="Top" Width="87" Click="Stats_Button_Click"/>
+        <Button Content="Clear DB" HorizontalAlignment="Left" Margin="708,10,0,0" VerticalAlignment="Top" Width="82" Click="Clear_Button_Click"/>
 
     </Grid>
 </Window>

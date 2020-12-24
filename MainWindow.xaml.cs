@@ -24,15 +24,15 @@ using onnxModel;
 
 namespace UI
 {
-
+    
     public partial class MainWindow : Window
     {
-        private OnnxModel mdl = null;
+        private Model mdl = new Model();
 
-        private ObservableCollection<Image> imagecollection;
-        private ObservableCollection<ClassName> classcollection;
-
-        private ObservableCollection<PredictionValues> resultcollection;
+        private ObservableCollection<Image> all_images;
+        private ObservableCollection<ClassName> class_counts;
+        
+        private ObservableCollection<PredictionResult> all_results;
         private ObservableCollection<Image> selected_class_images;
 
         private ICollectionView list_box_predicted_labels_Updater;
@@ -45,17 +45,19 @@ namespace UI
 
         public string selected_dir;
 
-        public void OutputHandler(PredictionValues current_result)
+        private ObservableCollection<string> db_stats;
+        
+        public void OutputHandler(PredictionResult current_result)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                resultcollection.Add(current_result);
-                var current_class = from i in classcollection
+                all_results.Add(current_result);
+                var current_class = from i in class_counts
                         where i.Class == current_result.Label
                         select i;
                 if (current_class.Count() == 0)
                 {
-                    classcollection.Add(new ClassName(current_result.Label));
+                    class_counts.Add(new ClassName(current_result.Label));
                 }
                 else
                 {
@@ -63,10 +65,13 @@ namespace UI
                     list_box_predicted_labels_Updater.Refresh();
                 }
 
-                var current_image = from i in imagecollection
+                var current_image = from i in all_images
                     where i.Path == current_result.Path
                     select i;
                 current_image.First().Class = current_result.Label;
+
+
+                
             }
             ));
         }
@@ -85,22 +90,23 @@ namespace UI
         {
             this.isWorking = true;
 
-            resultcollection.Clear();
-            imagecollection.Clear();
-            classcollection.Clear();
+            all_results.Clear();
+            all_images.Clear();
+            class_counts.Clear();
             ThreadPool.QueueUserWorkItem(new WaitCallback(param =>
             {
                 foreach (string path in Directory.GetFiles(selected_dir, "*.jpg"))
                 {
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        imagecollection.Add(new Image(path));
+                        all_images.Add(new Image(path));
                     }));
                 }
             }));
 
-            mdl = new OnnxModel(selected_dir);
-            mdl.EventResult += OutputHandler;
+            string model_path = "C:/Users/Владимир/prak1/s02170147/ImageProcessor/onnxModel/mnist-8.onnx";
+            mdl = new Model(model_path, selected_dir);
+            mdl.ResultEvent += OutputHandler;
             mdl.Work();
         }
         private void StopCommandHandler(object sender, ExecutedRoutedEventArgs e)
@@ -127,20 +133,28 @@ namespace UI
         {
             InitializeComponent();
 
-            resultcollection = new ObservableCollection<PredictionValues>();
-            imagecollection = new ObservableCollection<Image>();
-
-            classcollection = new ObservableCollection<ClassName>();
+            all_results = new ObservableCollection<PredictionResult>();
+            all_images = new ObservableCollection<Image>();
+  
+            class_counts = new ObservableCollection<ClassName>();
             selected_class_images = new ObservableCollection<Image>();
 
+            db_stats = new ObservableCollection<string>();
+
             Binding class_count = new Binding();
-            class_count.Source = classcollection;
+            class_count.Source = class_counts;
             list_box_predicted_labels.SetBinding(ItemsControl.ItemsSourceProperty, class_count);
             list_box_predicted_labels_Updater = CollectionViewSource.GetDefaultView(list_box_predicted_labels.ItemsSource);
 
             Binding for_selected_class = new Binding();
             for_selected_class.Source = selected_class_images;
             list_box_selected_images.SetBinding(ItemsControl.ItemsSourceProperty, for_selected_class);
+
+            Binding for_db_stats = new Binding();
+            for_db_stats.Source = db_stats;
+            list_box_db_stats.SetBinding(ItemsControl.ItemsSourceProperty, for_db_stats);
+
+            
         }
         private void list_box_predicted_labels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -151,13 +165,34 @@ namespace UI
             {
                 return;
             }
-            foreach (var single_img in imagecollection)
+            foreach (var single_img in all_images)
             {
                 if (single_img.Class == selected_class.Class)
                 {
                     selected_class_images.Add(single_img);
                 }
             }
+        }
+
+        private void Stats_Button_Click(object sender, RoutedEventArgs e)
+        {
+            db_stats.Clear();
+            
+            List<string> all_res = mdl.ShowDbStats();
+            
+            foreach (var item in all_res)
+            {
+                db_stats.Add(item);
+            }
+            list_box_db_stats.Items.Refresh();
+            
+        }
+
+        private void Clear_Button_Click(object sender, RoutedEventArgs e)
+        {
+            mdl.ClearDB();
+            db_stats.Clear();
+            list_box_db_stats.Items.Refresh();
         }
     }
 
@@ -190,7 +225,7 @@ namespace UI
             return Class + ": " + Count;
         }
     }
-
+    
     public class Image : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

@@ -1,151 +1,234 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using SixLabors.ImageSharp; // Из одноимённого пакета NuGet
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using System.Linq;
 using SixLabors.ImageSharp.Processing;
-using System.Collections.Concurrent;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.OnnxRuntime;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.IO;
+using System.IO.Enumeration;
+using System.Threading;
+
 
 namespace onnxModel
 {
-
-    public class PredictionValues
+    public class PredictionResult
     {
         public string Path;
         public string Label;
         public double Confidence;
-        public PredictionValues(string path, string label, double confidence)
+        public PredictionResult(string path, string label, double confidence)
         {
             this.Path = path;
             this.Label = label;
             this.Confidence = confidence;
         }
-        
     };
-    public class OnnxModel
+    public class Model
     {
-        private string path;
-        private ConcurrentQueue<string> _filenames;
-        InferenceSession session;
-        private static readonly ManualResetEvent StopSignal = new ManualResetEvent(false);
-
-        public delegate void PredictionHandler(PredictionValues ResultPred);
-        public event PredictionHandler EventResult;
-        public delegate void OutputHandler(string outMessage);
-        public event OutputHandler OutputEvent;
+        private static ManualResetEvent _stopSignal = new ManualResetEvent(false);
+        private string _img_path;
+        private InferenceSession session;
+        private ConcurrentQueue<string> filenames;
 
 
-        public OnnxModel(string Path = "C:/Users/Владимир/OneDrive/Desktop/img")
+        public delegate void PredictionHandler(PredictionResult Result);
+        public event PredictionHandler ResultEvent;
+
+        public delegate void ErrorHandler(string errMessage);
+        public event ErrorHandler ErrMessage;
+
+        public delegate void InfoHandler(string infoMessage);
+        public event InfoHandler InfoMessage;
+
+        public delegate void Output(string msg);
+
+
+        public Model(
+            string model_path = "C:/Users/Владимир/prak1/s02170147/ImageProcessor/onnxModel/mnist-8.onnx",
+            string img_path = ""
+            )
         {
-            this.path = Path;
-            this.session = new InferenceSession("C:/Users/Владимир/prak1/s02170147/ImageProcessor/mnist-8.onnx");        
+            this._img_path = img_path;
+            this.session = new InferenceSession(model_path);
         }
 
-        public PredictionValues FileRead(string ImagePath)
+        private DenseTensor<float> ImageToTensor(string single_img_path)
         {
-            Image<Rgb24> image = Image.Load<Rgb24>(ImagePath);
+            using var image = Image.Load<Rgb24>(single_img_path);
+            const int TargetWidth = 224;
+            const int TargetHeight = 224;
 
-            const int TargetWidth = 28;
-            const int TargetHeight = 28;
-
+            // Изменяем размер картинки до 224 x 224
             image.Mutate(x =>
             {
                 x.Resize(new ResizeOptions
                 {
                     Size = new Size(TargetWidth, TargetHeight),
-                    Mode = ResizeMode.Crop
+                    Mode = ResizeMode.Crop // Сохраняем пропорции обрезая лишнее
                 });
-                x.Grayscale();
             });
 
-            var input = new DenseTensor<float>(new[] { 1, 1, TargetHeight, TargetWidth });
-            for (int y = 0; y < TargetHeight; y++)         
+            // Перевод пикселов в тензор и нормализация
+            var input = new DenseTensor<float>(new[] { 1, 3, TargetHeight, TargetWidth });
+            var mean = new[] { 0.485f, 0.456f, 0.406f };
+            var stddev = new[] { 0.229f, 0.224f, 0.225f };
+            for (int y = 0; y < TargetHeight; y++)
+            {
+                Span<Rgb24> pixelSpan = image.GetPixelRowSpan(y);
                 for (int x = 0; x < TargetWidth; x++)
-                    input[0, 0, y, x] = image[x,y].R / 255f;
+                {
+                    input[0, 0, y, x] = ((pixelSpan[x].R / 255f) - mean[0]) / stddev[0];
+                    input[0, 1, y, x] = ((pixelSpan[x].G / 255f) - mean[1]) / stddev[1];
+                    input[0, 2, y, x] = ((pixelSpan[x].B / 255f) - mean[2]) / stddev[2];
+                }
+            }
+            return input;
+        }
 
-            var inputs = new List<NamedOnnxValue> {NamedOnnxValue.CreateFromTensor("Input3", input)};
+
+        private bool CheckIfInDb(string single_image_path, out PredictionResult result)
+        {
+            using (var db = new MyResultContext())
+            {
+                byte[] RawImg = File.ReadAllBytes(single_image_path);
+                
+                byte[] hash = System.Security.Cryptography.MD5.Create().ComputeHash(RawImg);
+                var query = db.Results.Where(p => p.Hash == hash).Select(p => p).ToList();
+                if (query.Count == 0)
+                {
+                    result = null;
+                    return false;
+                }
+                foreach (var single_image in query)
+                {
+                    db.Entry(single_image).Reference(p => p.Detail).Load();
+                    if (RawImg.SequenceEqual(single_image.Detail.RawImg))
+                    {
+                        single_image.CountReffered++;
+                        db.SaveChanges();
+                        result = new PredictionResult(single_image.Path, single_image.Label, single_image.Confidence);
+                        return true;
+                    }
+                }
+            }
+            result = null;
+            return true;
+        }
+        private void AddToDb(PredictionResult pred)
+        {
+            using (var db = new MyResultContext())
+            {
+                byte[] CurrentRawImg = File.ReadAllBytes(pred.Path);
+                byte[] CurrentHash = System.Security.Cryptography.MD5.Create().ComputeHash(CurrentRawImg);
+                ImgDetail detail_to_db = new ImgDetail { RawImg = CurrentRawImg };
+                db.ImgDetails.Add(detail_to_db);
+
+                Result pred_to_db = new Result { Hash = CurrentHash, Path = pred.Path, Label = pred.Label, Confidence = pred.Confidence, 
+                                                 CountReffered = 1, Detail = detail_to_db };
+                db.Results.Add(pred_to_db);
+               
+                db.SaveChanges();
+                
+            };
+        }
+        public void ClearDB()
+        {
+            using (var db = new MyResultContext())
+            {
+                try
+                {
+                    db.Database.EnsureDeleted();
+                    db.Database.EnsureCreated();
+                }
+                catch (Exception) {
+                }
+            }
+        }
+
+        private PredictionResult Predict_with_db(DenseTensor<float> input, string single_image_path)
+        {
+            var inputs = new List<NamedOnnxValue>
+            {
+                NamedOnnxValue.CreateFromTensor("Input3", input)
+            };
             using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = session.Run(inputs);
 
-            var output = results.First().AsEnumerable<float>();
+            // Получаем 1000 выходов и считаем для них softmax
+            var output = results.First().AsEnumerable<float>().ToArray();
             var sum = output.Sum(x => (float)Math.Exp(x));
             var softmax = output.Select(x => (float)Math.Exp(x) / sum);
 
-            var preds = softmax.Select((x, i) =>
-                    new Tuple<string, float>(LabelMap.ClassLabels[i], x))
-                    .OrderByDescending(x => x.Item2)
-                    .Take(10);
-            //var prediction = "\n";
             var confidence = softmax.Max();
-            var index = softmax.ToList().IndexOf(confidence);
-            //foreach (var (label, confidence) in preds.ToList())
-            //{
-            //    prediction += $"Label: {label}, confidence: {confidence}\n";
-            //}
-            return new PredictionValues(ImagePath, LabelMap.ClassLabels[index], confidence);
-        
+            var class_idx = softmax.ToList().IndexOf(confidence);
+
+            PredictionResult res;
+            if (CheckIfInDb(single_image_path, out res))
+            {
+                return res;
+            }
+            else
+            {
+                PredictionResult pred = new PredictionResult(single_image_path, LabelMap.ClassLabels[class_idx], confidence);
+                AddToDb(pred);
+                return pred;
+            }
+        }
+        public void Stop() => _stopSignal.Set();
+        private void worker()
+        {
+            string name;
+            while (filenames.TryDequeue(out name))
+            {
+                if (_stopSignal.WaitOne(0))
+                {
+                    return;
+                }
+                ResultEvent?.Invoke(Predict_with_db(ImageToTensor(name), name));
+
+            }
         }
 
-        public void Stop() => StopSignal.Set();
-
+     
         public void Work()
         {
             try
             {
-                _filenames = new ConcurrentQueue<string>(Directory.GetFiles(path, "*.jpg"));
+                filenames = new ConcurrentQueue<string>(Directory.GetFiles(_img_path, "*.jpg"));
             }
-            catch (DirectoryNotFoundException)
+            catch (DirectoryNotFoundException exc)
             {
-                OutputEvent?.Invoke("No Files");
+                ErrMessage?.Invoke("Directory doesn't exist!");
                 return;
             }
-            //Console.CancelKeyPress += (sender, eArgs) =>
-            //{
-            //    StopSignal.Set();
-             //   eArgs.Cancel = true;
-            //};
-            var procNumb = Environment.ProcessorCount;
-            var threads = new Thread[procNumb];
-            for (var i = 0; i < procNumb; ++i)
+
+            _stopSignal = new ManualResetEvent(false);
+            var max_proc_count = Environment.ProcessorCount;
+            Thread[] threads = new Thread[max_proc_count];
+            for (int i = 0; i < max_proc_count; ++i)
             {
-                OutputEvent?.Invoke("Begining thread");
-                threads[i] = new Thread(Worker);
+                InfoMessage?.Invoke("Statring thread");
+                threads[i] = new Thread(worker);
                 threads[i].Start();
             }
-
-            for (var i = 0; i < procNumb; ++i)
-            {
-                threads[i].Join();
-            }
-
-            OutputEvent?.Invoke("Work Finished");
         }
 
-        private void Worker()
+        public List<string> ShowDbStats()
         {
-            while (_filenames.TryDequeue(out var name))
+            List<string> all_res = new List<string>();
+            using (var db = new MyResultContext())
             {
-                if (StopSignal.WaitOne(0))
+                foreach (var single_res in db.Results.ToList())
                 {
-                    OutputEvent?.Invoke("Breaking by signal");
-                    return;
+                    all_res.Add(single_res.Label + " " + single_res.Hash + " " + single_res.CountReffered);
                 }
-
-                //var prediction = FileRead(name);
-                //Console.WriteLine(name + prediction);
-                EventResult?.Invoke(FileRead(name));
-
-            }
-
-            OutputEvent?.Invoke("Normal finish");
+            };
+            return all_res;
         }
 
     }
-
-
     static class LabelMap
     {
         public static readonly string[] ClassLabels = new[]
@@ -162,5 +245,5 @@ namespace onnxModel
             "9",
         };
     }
-
-} 
+ 
+}
