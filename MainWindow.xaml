@@ -1,0 +1,47 @@
+﻿<Window x:Class="UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.CommandBindings>
+        <CommandBinding Command = "ApplicationCommands.Open"
+                        CanExecute="CanOpenCommandHanlder"
+                        Executed= "OpenCommandHandler"/>
+        <CommandBinding Command="{x:Static local:MainWindow.Start}"
+                        CanExecute="CanStartCommandHandler"
+                        Executed="StartCommandHandler"/>
+        <CommandBinding Command="{x:Static local:MainWindow.Stop}"
+                        CanExecute="CanStopCommandHandler"
+                        Executed="StopCommandHandler"/>
+    </Window.CommandBindings>
+
+    <Grid>
+        <Button Content="Open" Command="ApplicationCommands.Open" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="88"/>
+        <Button Content="Start" Command="{x:Static local:MainWindow.Start}" HorizontalAlignment="Left" Margin="104,10,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Content="Stop" Command="{x:Static local:MainWindow.Stop}" HorizontalAlignment="Left" Margin="184,10,0,0" VerticalAlignment="Top" Width="75"/>
+
+        <ListBox x:Name="list_box_predicted_labels" HorizontalAlignment="Left" Margin="10,56,0,10" Width="250" SelectionChanged="list_box_predicted_labels_SelectionChanged"/>
+        <ListBox x:Name="list_box_selected_images" HorizontalAlignment="Left" Margin="264,10,0,10" Width="344">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="1" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch">
+                        <Image Source="{Binding Bitmap}" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                        <TextBlock Text="{Binding Class}" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <ListBox Name="list_box_db_stats" Margin="616,40,10,10"/>
+        <Button Content="Show Stats" HorizontalAlignment="Left" Margin="616,10,0,0" VerticalAlignment="Top" Width="87" Click="Stats_Button_Click"/>
+        <Button Content="Clear DB" HorizontalAlignment="Left" Margin="708,10,0,0" VerticalAlignment="Top" Width="82" Click="Clear_Button_Click"/>
+
+    </Grid>
+</Window>
